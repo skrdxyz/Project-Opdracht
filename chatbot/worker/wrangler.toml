@@ -1,0 +1,16 @@
+name = "noras-flora-chatbot"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+[ai]
+binding = "AI"
+
+# Teller voor de limieten (per dag en per bezoeker per uur)
+[[durable_objects.bindings]]
+name = "LIMITER"
+class_name = "Limiter"
+
+# SQLite-backed Durable Objects zijn beschikbaar op het gratis plan
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Limiter"]

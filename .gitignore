@@ -1,0 +1,10 @@
+# Wrangler / Cloudflare: bevat account-id en e-mailadres
+.wrangler/
+.dev.vars
+.env
+.env.*
+node_modules/
+
+# Editor / systeem
+.DS_Store
+.vscode/

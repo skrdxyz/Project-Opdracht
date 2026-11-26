@@ -155,12 +155,80 @@
       }, 450 + Math.min(html.length * 4, 600));
     }
 
-    function ask(text) {
-      text = text.trim();
-      if (!text) return;
-      addMsg("user", text);
+    function localReply(text) {
       var hit = findAnswer(text, faq);
       botReply(hit ? hit.answer : faq.fallback);
+    }
+
+    // veilig opmaken van AI-tekst: HTML escapen, **vet**, regelovergangen en links
+    function formatAi(t) {
+      var s = String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      s = s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+      s = s.replace(/\b(contact@noraflora\.com)\b/g, '<a href="mailto:$1">$1</a>');
+      s = s.replace(/\b(06 ?12345678)\b/g, function (m) { return '<a href="tel:0612345678">' + m + "</a>"; });
+      return s.replace(/\n/g, "<br>");
+    }
+
+    function plain(html) {
+      var d = document.createElement("div");
+      d.innerHTML = html.replace(/<br\s*\/?>/gi, "\n");
+      return d.textContent;
+    }
+
+    var busy = false;
+
+    function ask(text) {
+      text = text.trim();
+      if (!text || busy) return;
+      addMsg("user", text);
+
+      if (!faq.apiUrl) return localReply(text);
+
+      busy = true;
+      var typing = el("div", "nf-chat__msg nf-chat__msg--bot nf-chat__typing", "<span></span><span></span><span></span>");
+      box.appendChild(typing);
+      scroll();
+
+      var messages = history.msgs.slice(-10).map(function (m) {
+        return { role: m.who === "user" ? "user" : "assistant", content: plain(m.html) };
+      });
+
+      var ctrl = new AbortController();
+      var timer = setTimeout(function () { ctrl.abort(); }, 20000);
+
+      fetch(faq.apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: messages }),
+        signal: ctrl.signal,
+      })
+        .then(function (r) {
+          if (r.status === 429) {
+            return r.json().catch(function () { return {}; }).then(function (d) {
+              var e = new Error("limit");
+              e.limit = d.reason === "daily" ? "daily" : "hourly";
+              throw e;
+            });
+          }
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(function (d) {
+          if (!d.reply) throw new Error("leeg");
+          typing.remove();
+          addMsg("bot", formatAi(d.reply));
+        })
+        .catch(function (e) {
+          typing.remove();
+          if (e && e.limit) {
+            // limiet bereikt: nette melding, geen FAQ-antwoord
+            addMsg("bot", e.limit === "daily" ? faq.limitDaily : faq.limitHourly);
+          } else {
+            // AI niet bereikbaar: val terug op de FAQ
+            localReply(text);
+          }
+        })
+        .then(function () { clearTimeout(timer); busy = false; });
     }
 
     function setOpen(open, focus) {

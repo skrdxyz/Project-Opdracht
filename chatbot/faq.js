@@ -13,6 +13,9 @@
  */
 window.NF_CHATBOT_FAQ = {
   botName: "Flora",
+  // Vul hier de URL van je Cloudflare Worker in (zie chatbot/worker/README.md).
+  // Leeg laten = alleen de FAQ hieronder gebruiken.
+  apiUrl: "https://noras-flora-chatbot.project-opdracht.workers.dev",
   welcome:
     "Hoi! 🌷 Ik ben <b>Flora</b>, de <b>AI-assistent</b> van Nora's Flora. " +
     "Vraag me gerust iets over openingstijden, aanbiedingen of waar je ons vindt.",
@@ -20,6 +23,14 @@ window.NF_CHATBOT_FAQ = {
     "Ik snap het verzoek niet 🤔. Ik ben een AI-assistent en kan alleen vragen over Nora's Flora beantwoorden. " +
     "Neem contact op met Nora, dan helpt zij je persoonlijk:<br>" +
     "📞 <a href=\"tel:0612345678\">06 12345678</a><br>" +
+    "✉️ <a href=\"mailto:contact@noraflora.com\">contact@noraflora.com</a>",
+  limitHourly:
+    "Je hebt het maximum aantal vragen per uur bereikt ⏳. Probeer het over een tijdje opnieuw, " +
+    "of neem direct contact op:<br>📞 <a href=\"tel:0612345678\">06 12345678</a> · " +
+    "✉️ <a href=\"mailto:contact@noraflora.com\">contact@noraflora.com</a>",
+  limitDaily:
+    "De chat is vandaag erg druk geweest en heeft zijn limiet bereikt 🌙. Probeer het morgen opnieuw, " +
+    "of neem direct contact op:<br>📞 <a href=\"tel:0612345678\">06 12345678</a> · " +
     "✉️ <a href=\"mailto:contact@noraflora.com\">contact@noraflora.com</a>",
   placeholder: "Typ je vraag…",
   disclaimer: "AI-assistent · antwoorden kunnen fouten bevatten",
